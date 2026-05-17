@@ -145,6 +145,7 @@ is_tibble(calendar_df)
 library(tidyverse)
 
 system("kaggle --version")
+# If Kaggle is not loaded that use pip install kaggle in command prompt
 
 # Download dataset using Kaggle CLI
 system("kaggle datasets download -d zeeshier/student-admission-records")
@@ -208,22 +209,21 @@ sum(!complete.cases(student_admission_replace_na_two))
 ## Student Admission Data Project 
 
 
-
-## Manipulate Data
-
 ### Examine Count of Unique Values
 ```{r}
 #lapply is list apply and apply is column/matrix apply
 apply(X=student_admission, MARGIN = 2, FUN = unique) %>% #MARGIN=2 means column fun=function
   lapply(FUN = length) %>% str()
 ```
-### Example: examine Admission Status
+### Examine Admission Status
+
 ```{r}
 
 unique(student_admission$`Admission Status`)
 
 ```
 ### Select and Rename Columns
+
 ```{r}
 
 student_admission <- student_admission %>%
@@ -232,6 +232,7 @@ student_admission <- student_admission %>%
 names(student_admission) <- c("Name", "Age", "Gender", "HS_Percentage", "TestScore", "Admit", "City")
 ```
 ### Change Data Types 
+
 ```{r}
 
 student_admission <- student_admission %>%
@@ -257,6 +258,7 @@ student_admission <- student_admission %>%
 
 
 ### Create Performance Category and Add to Tibble
+
 ```{r}
 
 student_admission <- student_admission %>%
@@ -281,6 +283,7 @@ student_admission <- student_admission %>%
 View(student_admission)
 ```
 ### Group- Level Summary
+
 ```{r}
 
 student_admission <- student_admission %>%
