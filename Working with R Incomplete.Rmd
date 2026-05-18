@@ -1,0 +1,357 @@
+---
+title: 'Introduction to R'
+author: 'Caroline Hutchings'
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: 
+  html_document: 
+    code_folding: show
+    theme: 'flatly'
+    toc: true
+    toc_float: true
+
+---
+
+## Vectors
+
+- Create a vector of numbers using assignment operator
+```{r message=FALSE, echo=FALSE, warning=FALSE, results=FALSE}
+nums <- ... #assignment operator
+nums
+```
+- Create a vector of strings
+```{r}
+week <- ...
+```
+- Create a vector with a range of numbers
+```{r}
+seq(...)
+```
+- Length of vector
+```{r}
+length(...)
+```
+## Working with Vectors
+
+- Create a named vector M-F temps
+```{r}
+temps <- c(...)
+temps
+```
+- Retrieve names of vector
+```{r}
+names(...)
+```
+- Add values to a vector
+```{r}
+temps <- append(temps, c(...))
+temps
+```
+## Indexing
+
+- Identify item at specific index
+```{r}
+week[]
+```
+- All items except at specified index
+```{r}
+week[]
+```
+- All items in vector of indexes
+```{r}
+week[c(...)]
+```
+
+
+## Working with Vector Operators
+
+- Relational Operators
+```{r}
+temps == 81
+temps > 88
+temps != 81
+```
+
+- Write code to shorten the names of temps 
+```{r }
+names(temps) <- c('M', 'T', 'W', 'Th', 'F')
+temps
+```
+
+- Write code to select temperature of Friday
+```{r}
+temps[...]
+temps[5]
+```
+## Dataframes
+
+- Create a dataframe from vectors
+```{r}
+months <- c('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
+num_days <- c(31,28,31,30,31,30,31,31,30,31,30,31)
+seasons <- c('W', 'W', 'Sp', 'Sp', 'Sp', 'Su', 'Su', 'Su', 'F', 'F', 'F', 'W')
+calendar_df <- data.frame(Month = months, NumDays = num_days, Season=seasons)
+calendar_df
+
+```
+## Dataframe Manipulations
+
+- Add rows to a dataframe
+```{r}
+calendar_df <- rbind(calendar_df, list(), list())
+calendar_df
+```
+- Add columns to a dataframe
+```{r}
+avg_temp <- c(52.3, 56.1, 62, 68.9, 75.9, 80.7, 81.9, 82.7, 78.5, 70.7, 61.1, 54.3, 53.4, 0)
+calendar_df <- cbind(calendar_df, ...)
+calendar_df
+```
+## Logical Operators
+
+- Find Months with 30 days that are warmer than 70 degrees.
+- Find Months that have a temperature lesss than 70 degrees or are summer months.
+```{r}
+calendar_df$AvgTemp >=70 & calendar_df$NumDays==30 #AND
+calendar_df$AvgTemp <=70 | calendar_df$Season=='Su'
+```
+## Dataframe Application
+
+- Find proportion of months with 31 days that are above 70 degrees.
+- Find proportion of months that have less than 31 days or are above 70 degrees.
+- Add a code chunck and then write code to answer the questions.
+
+### Solution
+```{r}
+
+```
+
+
+```{r}
+library(tidyverse)
+#convert a dataframe to a tibble
+calendar_tibble <- as_tibble(calendar_df)
+is_tibble(calendar_tibble)
+is_tibble(calendar_df)
+```
+
+
+## Load Data Set
+
+- Load data using Kaggle CLI
+
+```{r}
+
+library(tidyverse)
+
+system("kaggle --version")
+# If Kaggle is not loaded than use pip install kaggle in command prompt
+
+# Download dataset using Kaggle CLI
+system("kaggle datasets download -d zeeshier/student-admission-records")
+
+# Unzip dataset
+unzip("student-admission-records.zip")
+
+# Import into R
+student_admission <- read_csv("student_admission_record_dirty.csv")
+
+# Check if it's a tibble
+is_tibble(student_admission)
+
+```
+## View Data in Spreadsheet Format
+
+- View data in interactive window
+```{r}
+View(student_admission)
+```
+
+## Missing Data
+
+- Check for missing data
+```{r}
+#count of rows that have missing name
+sum(is.na(student_admission$Name))
+
+#count of NA values for all columns
+student_admission %>% 
+  apply(MARGIN = 2, function(col) sum(is.na(col)))
+
+#count of rows with one or more missing values
+sum(!complete.cases(student_admission))
+
+#drop rows with one or more missing values
+student_admission_dropna <- student_admission %>% 
+  filter(complete.cases(student_admission))
+nrow(student_admission_dropna)
+```
+- Replace missing values with 'Unknown'
+```{r}
+#replace Name with 'Unknown'
+student_admission_replace_na <- student_admission %>% 
+  mutate(Name = replace_na(Name, 'Unknown'))
+
+nrow(student_admission_replace_na)
+
+sum(!complete.cases(student_admission_replace_na))
+
+
+#replace Name and Admission Status with 'Unknown'
+student_admission_replace_na_two <- student_admission %>% 
+  mutate(across(c(Name, `Admission Status`),~ replace_na(.,'Unknown')))
+
+nrow(student_admission_replace_na_two)
+
+sum(!complete.cases(student_admission_replace_na_two))
+
+```
+## Student Admission Data Project 
+
+
+### Examine Count of Unique Values
+```{r}
+#lapply is list apply and apply is column/matrix apply
+apply(X=student_admission, ...) %>% #MARGIN=2 means column fun=function
+  lapply(FUN = length) %>% str()
+```
+### Examine Admission Status
+
+```{r}
+
+unique(student_admission$`Admission Status`)
+
+```
+### Select and Rename Columns
+
+```{r}
+
+student_admission <- student_admission %>%
+  select(Name, Age, Gender, `High School Percentage`, `Admission Test Score`, `Admission Status`, City)
+
+names(student_admission) <- c("Name", "Age", "Gender", "HS_Percentage", "TestScore", "Admit", "City")
+```
+### Change Data Types 
+
+```{r}
+
+student_admission <- student_admission %>%
+  mutate(
+    Age = as.numeric(Age),
+    HS_Percentage = as.numeric(HS_Percentage),
+    TestScore = as.numeric(TestScore),
+    Admit = ifelse(Admit == "Accepted", ...)
+  )
+```
+### Handling Missing Values
+
+```{r}
+
+student_admission <- student_admission %>%
+  mutate(
+    Name = replace_na(Name, "Unknown"),
+    HS_Percentage = replace_na(HS_Percentage, ...),
+    TestScore = replace_na(TestScore, ...)
+  )
+
+```
+
+
+### Create Performance Category and Add to Tibble
+
+```{r}
+
+student_admission <- student_admission %>%
+  mutate(
+    Performance = case_when(
+      ... >= 85 ~ "High",
+      ... >= 70 ~ "Medium",
+      TRUE ~ "Low"
+    )
+  )
+
+View(student_admission)
+```
+### Create Combined Score
+```{r}
+
+student_admission <- student_admission %>%
+  mutate(
+    CombinedScore = ...
+  )
+
+View(student_admission)
+```
+### Group- Level Summary
+
+```{r}
+
+student_admission <- student_admission %>%
+  group_by(City) %>%
+  mutate(
+    AvgCombinedScoreCity = mean(CombinedScore, na.rm = TRUE),
+    AdmitRateCity = mean(Admit, na.rm = TRUE),
+    CountCity = n()
+  )
+View(student_admission)
+```
+### City Summary
+
+```{r}
+
+city_summary <- student_admission %>%
+  group_by(City) %>%
+  summarize(
+    MeanPercent = ...,
+    MeanTest = ...,
+    AdmitRate = ...,
+    Count = n()
+  )
+
+city_summary
+
+```
+### Admission Rate per Performance Group
+
+```{r}
+
+admit_pct <- student_admission %>%
+  group_by(Performance) %>%
+  summarize(
+    Admitted = sum(...),
+    Total = n()
+  ) %>%
+  mutate(
+    AdmitPct = ...
+  )
+
+admit_pct
+
+```
+### Graph Admission Rate by Performance
+
+```{r}
+
+ggplot(admit_pct, aes(x = Performance, y = AdmitPct, fill = Performance)) +
+  geom_col() +
+  labs(
+    title = "Admission Rate by Performance Level",
+    x = "Performance Category",
+    y = "Admission Rate"
+  ) +
+  theme_minimal()
+
+```
+### Interactive Graph using Plotly
+
+```{r}
+#install.packages("plotly")
+library(plotly)
+
+p <- ggplot(admit_pct, aes(...)) +
+  geom_col()
+
+ggplotly(...)
+
+```
+
+
